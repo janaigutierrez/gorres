@@ -3,9 +3,19 @@
 
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { cookies } from 'next/headers'
 import { connectDB } from '@/lib/db'
 import { PricingConfig } from '@/models/PricingConfig'
 import { DEFAULT_PRICING } from '@/lib/pricing'
+import { decrypt, COOKIE_NAME } from '@/lib/session'
+
+async function requireAdmin(): Promise<boolean> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(COOKIE_NAME)?.value
+  if (!token) return false
+  const session = await decrypt(token)
+  return !!session
+}
 
 const VolumeDiscountSchema = z.object({
   minQty:   z.number().min(1),
@@ -47,6 +57,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (!await requireAdmin()) return NextResponse.json({ error: 'No autoritzat' }, { status: 401 })
   try {
     const body   = await req.json()
     const parsed = ConfigSchema.safeParse(body)

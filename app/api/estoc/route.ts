@@ -4,8 +4,18 @@
 
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { cookies } from 'next/headers'
 import { connectDB } from '@/lib/db'
 import { Stock, StockMovement } from '@/models/Stock'
+import { decrypt, COOKIE_NAME } from '@/lib/session'
+
+async function requireAdmin(): Promise<boolean> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(COOKIE_NAME)?.value
+  if (!token) return false
+  const session = await decrypt(token)
+  return !!session
+}
 
 export async function GET() {
   await connectDB()
@@ -24,6 +34,7 @@ const CreateStockSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  if (!await requireAdmin()) return NextResponse.json({ error: 'No autoritzat' }, { status: 401 })
   try {
     const body = await req.json()
 

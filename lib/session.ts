@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from 'jose'
 export const COOKIE_NAME = 'gorres-session'
 
 const getKey = () =>
-  new TextEncoder().encode(process.env.AUTH_SECRET ?? 'default-secret-change-me-min-32-chars!')
+  new TextEncoder().encode(process.env.NEXTAUTH_SECRET ?? 'default-secret-change-me-min-32-chars!')
 
 export async function encrypt(payload: { role: string }) {
   return new SignJWT(payload)
