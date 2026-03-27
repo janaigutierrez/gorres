@@ -41,7 +41,7 @@ const CreateOrderSchema = z.object({
     address:      z.union([z.string(), z.null()]).optional(),
     city:         z.union([z.string(), z.null()]).optional(),
     notes:        z.union([z.string(), z.null()]).optional(),
-    shippingZone: z.string().optional(),
+    shippingZone: z.union([z.string(), z.null()]).optional(),
   }),
   payment: z.object({
     method: z.enum(['bizum', 'transfer', 'cash']),
